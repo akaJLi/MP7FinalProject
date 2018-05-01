@@ -15,9 +15,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import org.json.JSONObject;
 
@@ -32,6 +29,8 @@ public class MainActivity extends AppCompatActivity {
     /** Request queue for our network requests. */
     private static RequestQueue requestQueue;
 
+    /** Default logging tag for messages from the main activity. */
+    private static final String TAG = "MP7:Main";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,13 +69,14 @@ public class MainActivity extends AppCompatActivity {
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(final JSONObject response) {
-                            showDefinition(response);
-//                            Log.d(TAG, response.toString());
+                            Log.d(TAG, response.toString());
+                            TextView definition = findViewById(R.id.definitionView);
+                            definition.setText(response.toString());
                         }
                     }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(final VolleyError error) {
-//                    Log.w(TAG, error.toString());
+                    Log.w(TAG, error.toString());
                 }
             });
             requestQueue.add(jsonObjectRequest);
@@ -84,8 +84,9 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-    public void showDefinition(final JSONObject response) {
-        TextView definitionView = (TextView) findViewById(R.id.definitionView);
-        definitionView.setText(response.toString());
-    }
+//    public void showDefinition(final JSONObject response) {
+//        TextView getDefinition = (TextView) findViewById(R.id.definition);
+//        getDefinition.setText(response.toString());
+//        getDefinition.setVisibility(View.VISIBLE);
+//    }
 }
