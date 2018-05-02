@@ -13,9 +13,13 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
@@ -26,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
 
     Button search;
 
+    TextView definition;
     /** Request queue for our network requests. */
     private static RequestQueue requestQueue;
 
@@ -34,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -41,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
         requestQueue = Volley.newRequestQueue(this);
 
         wordInput = (EditText) findViewById(R.id.wordInput);
-
+        definition = findViewById(R.id.definitionView);
         search = (Button) findViewById(R.id.search);
         search.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -60,18 +66,17 @@ public class MainActivity extends AppCompatActivity {
     }
     void startAPICall(String word) {
         try {
-            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+            JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(
                     Request.Method.GET,
                     "http://api.wordnik.com:80/v4/word.json/"+ word + "/" +
                             "definitions?limit=1&includeRelated=true&sourceDictionaries=webster&useCanonical" +
                             "=false&includeTags=false&api_key=253b52e5c6d96e812f00b0b0a4602a1240265cf2e539959ad",
                     null,
-                    new Response.Listener<JSONObject>() {
+                    new Response.Listener<JSONArray>() {
                         @Override
-                        public void onResponse(final JSONObject response) {
+                        public void onResponse(final JSONArray response) {
                             Log.d(TAG, response.toString());
-                            TextView definition = findViewById(R.id.definitionView);
-                            definition.setText(response.toString());
+                            showDefinition(response);
                         }
                     }, new Response.ErrorListener() {
                 @Override
@@ -79,14 +84,19 @@ public class MainActivity extends AppCompatActivity {
                     Log.w(TAG, error.toString());
                 }
             });
-            requestQueue.add(jsonObjectRequest);
+            requestQueue.add(jsonArrayRequest);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-//    public void showDefinition(final JSONObject response) {
-//        TextView getDefinition = (TextView) findViewById(R.id.definition);
-//        getDefinition.setText(response.toString());
-//        getDefinition.setVisibility(View.VISIBLE);
-//    }
+
+    public void showDefinition(final JSONArray response) {
+        try {
+            JSONObject body = response.getJSONObject(0);
+            String text = body.getString("text");
+            definition.setText(text);
+        } catch (Exception e) {
+            Toast.makeText(this, "Invalid word", Toast.LENGTH_SHORT).show();
+        }
+    }
 }
